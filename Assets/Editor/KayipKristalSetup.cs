@@ -91,6 +91,20 @@ public static class KayipKristalSetup
             BuildOptions.None);
     }
 
+    [MenuItem("Kayip Kristal/Build Saved Scenes")]
+    public static void BuildSavedScenes()
+    {
+        ConfigureBuildScenes();
+        AssetDatabase.SaveAssets();
+
+        Directory.CreateDirectory(Path.GetDirectoryName(BuildPath));
+        BuildPipeline.BuildPlayer(
+            new[] { "Assets/Scenes/TitleScreen.unity", ScenePath, Level2Path, Level3Path },
+            BuildPath,
+            BuildTarget.StandaloneWindows64,
+            BuildOptions.None);
+    }
+
     [MenuItem("Kayip Kristal/Validate Player Start")]
     public static void ValidatePlayerStart()
     {
@@ -755,12 +769,14 @@ public static class KayipKristalSetup
             AddPointLight(collectable.transform, "Crystal_Theme_Light", crystalLight, 1.35f, 2.6f);
         }
 
-        ConfigureThemedEnemies(enemyColor);
+        ConfigureThemedEnemies(enemyColor, level);
+        ConfigureLevelDoorSwitchColors(level);
+        AddDifficultyProgression(level, crystalColor, crystalLight, enemyColor);
 
         MissionState mission = Object.FindObjectOfType<MissionState>();
         if (mission != null)
         {
-            mission.RequiredCrystals = 5;
+            mission.RequiredCrystals = level == 2 ? 6 : level == 3 ? 7 : 5;
             mission.ScorePerCrystal = level == 1 ? 10 : level == 2 ? 15 : 20;
             mission.WinSceneName = "";
         }
@@ -821,13 +837,14 @@ public static class KayipKristalSetup
         objective = "GREEN GROVE: Collect 5 emerald crystals, then enter the castle gate.";
     }
 
-    private static void ConfigureThemedEnemies(Color enemyColor)
+    private static void ConfigureThemedEnemies(Color enemyColor, int level)
     {
         GameObject enemyProjectile = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/EnemyProjectile.prefab");
         foreach (Actor actor in Object.FindObjectsOfType<Actor>())
         {
             if (actor.GetComponent<Platformer2DController>() != null) continue;
 
+            actor.Health = level == 3 ? 4 : 3;
             actor.DamageSourcesTags = new[] { "PlayerDamage" };
             EditorUtility.SetDirty(actor);
             PrefabUtility.RecordPrefabInstancePropertyModifications(actor);
@@ -856,18 +873,233 @@ public static class KayipKristalSetup
             thrower.ThrowingForce = Vector3.left;
             thrower.UsePhysics2D = true;
             thrower.AutoThrow = true;
-            thrower.AutoThrowDelaySeconds = 2.1f;
+            thrower.AutoThrowDelaySeconds = level == 3 ? 1.35f : 1.85f;
             thrower.AimAtPlayer = true;
-            thrower.ProjectileSpeed = 3.5f;
-            thrower.AutoThrowMaxDistance = 5f;
+            thrower.ProjectileSpeed = level == 3 ? 4.6f : 3.7f;
+            thrower.AutoThrowMaxDistance = level == 3 ? 7.4f : 6.2f;
             thrower.AutoThrowRequiresLineOfSight = true;
-            thrower.AutoThrowRequiresFacingTarget = true;
-            thrower.ProjectileActorDamage = 1;
+            thrower.AutoThrowRequiresFacingTarget = false;
+            thrower.ProjectileActorDamage = level == 3 ? 2 : 1;
             thrower.OverrideProjectileColor = true;
             thrower.ProjectileColor = enemyColor;
             EditorUtility.SetDirty(thrower);
             PrefabUtility.RecordPrefabInstancePropertyModifications(thrower);
         }
+    }
+
+    private static void ConfigureLevelDoorSwitchColors(int level)
+    {
+        if (level <= 1) return;
+
+        Color doorColor = level == 2 ? new Color(0.05f, 0.7f, 0.9f, 1f) : new Color(0.95f, 0.18f, 0.05f, 1f);
+        Color switchColor = level == 2 ? new Color(0.2f, 0.95f, 1f, 1f) : new Color(1f, 0.58f, 0.08f, 1f);
+
+        foreach (Door door in Object.FindObjectsOfType<Door>(true))
+        {
+            foreach (SpriteRenderer renderer in door.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                renderer.color = doorColor;
+                renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 28);
+                EditorUtility.SetDirty(renderer);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
+            }
+        }
+
+        foreach (Switch pressureSwitch in Object.FindObjectsOfType<Switch>(true))
+        {
+            foreach (SpriteRenderer renderer in pressureSwitch.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                renderer.color = switchColor;
+                renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 30);
+                EditorUtility.SetDirty(renderer);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
+            }
+        }
+    }
+
+    private static void AddDifficultyProgression(int level, Color jewelColor, Color jewelLight, Color enemyColor)
+    {
+        const string rootName = "DifficultyProgression_Additions";
+        GameObject existingRoot = GameObject.Find(rootName);
+        if (existingRoot != null)
+            Object.DestroyImmediate(existingRoot);
+
+        if (level <= 1) return;
+
+        GameObject root = new GameObject(rootName);
+
+        Vector3[] enemyPositions = level == 2
+            ? new[]
+            {
+                new Vector3(-6.6f, 2.65f, 0f),
+                new Vector3(5.4f, 5.0f, 0f),
+                new Vector3(13.2f, -0.15f, 0f),
+                new Vector3(22.4f, 4.85f, 0f)
+            }
+            : new[]
+            {
+                new Vector3(-9.5f, 2.65f, 0f),
+                new Vector3(-1.2f, 6.35f, 0f),
+                new Vector3(7.4f, 4.95f, 0f),
+                new Vector3(21.8f, 7.25f, 0f),
+                new Vector3(23.2f, 8.8f, 0f),
+                new Vector3(26.0f, 8.9f, 0f)
+            };
+
+        Vector3[] spikePositions = level == 2
+            ? new[]
+            {
+                new Vector3(-2.2f, 1.18f, 0f),
+                new Vector3(8.8f, 3.48f, 0f),
+                new Vector3(15.6f, -1.4f, 0f),
+                new Vector3(21.6f, 4.55f, 0f),
+                new Vector3(24.4f, 4.55f, 0f)
+            }
+            : new[]
+            {
+                new Vector3(-7.1f, 1.18f, 0f),
+                new Vector3(0.8f, 4.82f, 0f),
+                new Vector3(8.8f, 3.48f, 0f),
+                new Vector3(14.9f, -1.4f, 0f),
+                new Vector3(20.6f, 4.55f, 0f),
+                new Vector3(24.2f, 7.85f, 0f),
+                new Vector3(26.4f, 7.85f, 0f),
+                new Vector3(28.2f, 7.85f, 0f)
+            };
+
+        Vector3[] jewelPositions = level == 2
+            ? new[]
+            {
+                new Vector3(3.2f, 6.2f, 0f),
+                new Vector3(18.2f, 1.35f, 0f)
+            }
+            : new[]
+            {
+                new Vector3(3.2f, 6.2f, 0f),
+                new Vector3(18.2f, 1.35f, 0f),
+                new Vector3(25.4f, 9.55f, 0f)
+            };
+
+        foreach (Vector3 position in enemyPositions)
+            AddProgressionEnemy(root.transform, level, position, enemyColor);
+
+        Color spikeColor = level == 2 ? new Color(0.35f, 0.78f, 1f, 1f) : new Color(1f, 0.26f, 0.1f, 1f);
+        foreach (Vector3 position in spikePositions)
+            AddProgressionSpike(root.transform, level, position, spikeColor);
+
+        foreach (Vector3 position in jewelPositions)
+            AddProgressionJewel(root.transform, level, position, jewelColor, jewelLight);
+    }
+
+    private static void AddProgressionEnemy(Transform parent, int level, Vector3 position, Color enemyColor)
+    {
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Enemy.prefab");
+        GameObject enemy = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (enemy == null) return;
+
+        enemy.name = level == 2 ? "Progression_BlueGuard" : "Progression_CrimsonGuard";
+        enemy.transform.SetParent(parent);
+        enemy.transform.position = position;
+        float scale = level == 2 ? 0.95f : 1.05f;
+        enemy.transform.localScale = new Vector3(scale, scale, 1f);
+
+        ConfigureThemedEnemy(enemy, level, enemyColor);
+    }
+
+    private static void ConfigureThemedEnemy(GameObject enemy, int level, Color enemyColor)
+    {
+        Actor actor = enemy.GetComponent<Actor>();
+        if (actor != null)
+        {
+            actor.Health = level == 3 ? 4 : 3;
+            actor.DamageSourcesTags = new[] { "PlayerDamage" };
+            actor.DamageInvincibilitySeconds = level == 3 ? 0.28f : 0.36f;
+            EditorUtility.SetDirty(actor);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(actor);
+        }
+
+        foreach (SpriteRenderer renderer in enemy.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            renderer.color = enemyColor;
+            renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 22);
+            EditorUtility.SetDirty(renderer);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
+        }
+
+        GameObject enemyProjectile = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/EnemyProjectile.prefab");
+        Thrower thrower = enemy.GetComponent<Thrower>();
+        if (thrower == null)
+            thrower = enemy.AddComponent<Thrower>();
+
+        thrower.Projectile = enemyProjectile;
+        thrower.ProjectileLocalScale = level == 2 ? new Vector3(0.34f, 0.34f, 1f) : new Vector3(0.42f, 0.42f, 1f);
+        thrower.ThrowingLocalOrigin = new Vector3(0f, 0.82f, 0f);
+        thrower.ThrowingForce = Vector3.left;
+        thrower.UsePhysics2D = true;
+        thrower.AutoThrow = true;
+        thrower.AutoThrowDelaySeconds = level == 3 ? 1.35f : 1.85f;
+        thrower.AimAtPlayer = true;
+        thrower.ProjectileSpeed = level == 3 ? 4.6f : 3.7f;
+        thrower.AutoThrowMaxDistance = level == 3 ? 7.4f : 6.2f;
+        thrower.AutoThrowRequiresLineOfSight = true;
+        thrower.AutoThrowRequiresFacingTarget = false;
+        thrower.ProjectileActorDamage = level == 3 ? 2 : 1;
+        thrower.OverrideProjectileColor = true;
+        thrower.ProjectileColor = enemyColor;
+        EditorUtility.SetDirty(thrower);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(thrower);
+    }
+
+    private static void AddProgressionSpike(Transform parent, int level, Vector3 position, Color spikeColor)
+    {
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Spikes.prefab");
+        GameObject spike = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (spike == null) return;
+
+        spike.name = level == 2 ? "Progression_BlueSpikes" : "Progression_CrimsonSpikes";
+        spike.transform.SetParent(parent);
+        spike.transform.position = position;
+        float scale = level == 2 ? 0.85f : 1.05f;
+        spike.transform.localScale = new Vector3(scale, scale, 1f);
+
+        foreach (SpriteRenderer renderer in spike.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            renderer.color = spikeColor;
+            renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 26);
+            EditorUtility.SetDirty(renderer);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
+        }
+    }
+
+    private static void AddProgressionJewel(Transform parent, int level, Vector3 position, Color jewelColor, Color jewelLight)
+    {
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Jewel.prefab");
+        GameObject jewel = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (jewel == null) return;
+
+        jewel.name = level == 2 ? "Progression_Sapphire" : "Progression_Ruby";
+        jewel.transform.SetParent(parent);
+        jewel.transform.position = position;
+        jewel.transform.localScale = new Vector3(0.58f, 0.58f, 1f);
+
+        foreach (SpriteRenderer renderer in jewel.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            renderer.color = jewelColor;
+            renderer.sortingOrder = Mathf.Max(renderer.sortingOrder, 34);
+            EditorUtility.SetDirty(renderer);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
+        }
+
+        AnimationPicker picker = jewel.GetComponent<AnimationPicker>();
+        if (picker != null)
+        {
+            picker.Randomize = false;
+            picker.AnimIntParamValue = level == 2 ? 1 : 2;
+            EditorUtility.SetDirty(picker);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(picker);
+        }
+
+        AddPointLight(jewel.transform, "Progression_Jewel_Light", jewelLight, 1.35f, level == 2 ? 2.4f : 2.8f);
     }
 
     private static void RemoveLegacyCastleGate(Transform exitTransform)
