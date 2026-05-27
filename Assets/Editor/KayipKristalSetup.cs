@@ -556,21 +556,20 @@ public static class KayipKristalSetup
             if (EditorUtility.IsPersistent(go)) continue;
             if (!go.name.StartsWith("Door&Switch")) continue;
 
-            bool isBlockingDoor = go.name == "Door&Switch (4)";
             go.SetActive(true);
 
             foreach (Door door in go.GetComponentsInChildren<Door>(true))
             {
-                door.IsOpen = isBlockingDoor;
+                door.IsOpen = false;
                 Animator animator = door.GetComponent<Animator>();
                 if (animator != null)
-                    animator.enabled = !isBlockingDoor;
+                    animator.enabled = true;
             }
 
             foreach (Collider2D collider in go.GetComponentsInChildren<Collider2D>(true))
-                collider.enabled = !isBlockingDoor;
+                collider.enabled = true;
             foreach (Renderer renderer in go.GetComponentsInChildren<Renderer>(true))
-                renderer.enabled = !isBlockingDoor;
+                renderer.enabled = true;
         }
     }
 
@@ -914,7 +913,6 @@ public static class KayipKristalSetup
             if (EditorUtility.IsPersistent(go)) continue;
 
             bool isClutter = go.name.StartsWith("Spikes") ||
-                             go.name.StartsWith("Door&Switch") ||
                              go.name.Contains("Enemy Boss") ||
                              go.name.Contains("GreenGlow") ||
                              go.name.Contains("BlueMist") ||

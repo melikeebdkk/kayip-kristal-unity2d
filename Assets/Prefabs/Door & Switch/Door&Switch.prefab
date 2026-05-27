@@ -23,22 +23,22 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 625786020097595765}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1.5064999, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4837438678194946291}
   - {fileID: 229361409732588522}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2814294394486885577
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 3077942878393001986}
     m_Modifications:
     - target: {fileID: 972971094431528762, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
@@ -50,11 +50,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1110959767670487005, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
-      propertyPath: Doors.Array.data[0]
+      propertyPath: 'Doors.Array.data[0]'
       value: 
       objectReference: {fileID: 2506972152569542207}
     - target: {fileID: 1110959767670487005, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
-      propertyPath: Doors.Array.data[1]
+      propertyPath: 'Doors.Array.data[1]'
       value: 
       objectReference: {fileID: 2506972152569542207}
     - target: {fileID: 2603286381812301603, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
@@ -67,11 +67,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2603286381812301603, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2
+      value: -28.08
       objectReference: {fileID: 0}
     - target: {fileID: 2603286381812301603, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2
+      value: -0.65
       objectReference: {fileID: 0}
     - target: {fileID: 2603286381812301603, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
       propertyPath: m_LocalPosition.z
@@ -110,7 +110,9 @@ PrefabInstance:
       value: Switch
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fcc1d7fbe09b75c4a9e12ec17fd2bcfc, type: 3}
 --- !u!4 &229361409732588522 stripped
 Transform:
@@ -122,7 +124,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 3077942878393001986}
     m_Modifications:
     - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
@@ -130,16 +132,20 @@ PrefabInstance:
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.0396
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
       propertyPath: m_LocalScale.y
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.15
       objectReference: {fileID: 0}
     - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.02
       objectReference: {fileID: 0}
     - target: {fileID: 4391808916674776969, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
       propertyPath: m_LocalPosition.z
@@ -178,7 +184,9 @@ PrefabInstance:
       value: Door
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b96b61fb0a50f904087544d601d60b07, type: 3}
 --- !u!114 &2506972152569542207 stripped
 MonoBehaviour:
